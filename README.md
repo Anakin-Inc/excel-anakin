@@ -1,31 +1,133 @@
 # excel-anakin
 
 Microsoft Excel Office Add-in for [Anakin](https://anakin.io) — web scraping,
-AI-powered search, and multi-stage agentic research, available both as a task
-pane and as native worksheet formulas (`=ANAKIN.SCRAPE`, `=ANAKIN.SEARCH`,
-`=ANAKIN.AGENTICSEARCH`).
+AI-powered search and research, site mapping/crawling, Wire automation
+discovery and read actions, AI-visibility comparison, and monitor/session
+inspection as native worksheet formulas (`=ANAKIN.SCRAPE`, `=ANAKIN.SEARCH`,
+`=ANAKIN.MAP`, …), plus a task pane for everything state-changing (Wire write
+actions, sign-in, monitor create/control, session delete, browser
+automation).
+
+Covers 20 of Anakin's 21 API capabilities — every one except
+`wire_identities` (credential listing), left out deliberately rather than by
+oversight; see "What's not covered" below.
 
 ## What's covered
 
-The same baseline every other single-purpose Anakin integration built this
-session covers:
+### Read-only / idempotent → Custom Functions
 
-- **Scrape** — submits `POST /v1/url-scraper`, polls `GET /v1/url-scraper/:jobId`
-  until the job completes or fails. Returns markdown.
-- **Search** — calls `POST /v1/search`. Synchronous, no polling. Costs 3
-  credits per call.
-- **Agentic search** — submits `POST /v1/agentic-search`, polls
-  `GET /v1/agentic-search/:jobId`. Returns an AI-generated summary (plus
-  structured data, when the job's schema produced any). Costs 10 credits.
+Safe to live in a cell formula: Excel can recalculate these automatically
+(on open, on a referenced cell changing, on manual recalc) with no
+side effect beyond re-fetching data.
 
-Each is exposed twice, on two different Excel surfaces:
+| Function | Endpoint(s) | Returns |
+| --- | --- | --- |
+| `=ANAKIN.SCRAPE(url)` | `POST /url-scraper` → poll `GET /url-scraper/:jobId` | Markdown (scalar) |
+| `=ANAKIN.SEARCH(query)` | `POST /search` (sync) | `[url, title, snippet]` rows |
+| `=ANAKIN.AGENTICSEARCH(prompt)` | `POST /agentic-search` → poll `GET /agentic-search/:jobId` | AI summary (scalar) |
+| `=ANAKIN.MAP(url)` | `POST /map` → poll `GET /map/:jobId` | One discovered URL per row |
+| `=ANAKIN.CRAWL(url)` | `POST /crawl` → poll `GET /crawl/:jobId` | `[url, status, markdown]` rows |
+| `=ANAKIN.WIREDISCOVER(query)` | `GET /wire/resolve` (sync) | `[action_id, type, details]` rows |
+| `=ANAKIN.WIRECATALOG([slug])` | `GET /wire/catalog[/:slug]` (sync) | Raw JSON (scalar) |
+| `=ANAKIN.WIREREADACTION(actionId, [paramsJson])` | `POST /wire/task` → poll `GET /wire/jobs/:jobId` | `[field, value]` rows from the action's extracted data |
+| `=ANAKIN.AIVISIBILITYSEARCH(query)` | `POST /ai-visibility/search` → poll `GET /ai-visibility/search/:id` | Per-engine result rows + a synthesis row |
+| `=ANAKIN.AIVISIBILITYSOURCES()` | `GET /ai-visibility/sources` (sync) | `[slug, label]` rows |
+| `=ANAKIN.SESSIONLIST([domain])` | `GET /sessions` (sync) | One JSON-encoded session per row |
+| `=ANAKIN.MONITORLIST([id])` | `GET /monitors[/:id]` (sync) | One JSON-encoded monitor per row |
+| `=ANAKIN.MONITORCHANGES(id)` | `GET /monitors/:id/changes` (sync) | One JSON-encoded change record per row |
+
+Several of these (`wire_catalog`, `wire_read_action`'s `data`, `session_list`,
+`monitor_list`, `monitor_changes`) return API responses whose *item* shape
+isn't documented in `anakin-mcp`'s TypeScript types (`Promise<unknown>`) —
+rather than guess field names, those functions surface the real JSON
+verbatim (as a scalar or one JSON string per row) instead of a fabricated
+column layout. `=ANAKIN.WIREDISCOVER` and `=ANAKIN.AIVISIBILITYSOURCES` use
+named columns because their fields (`action_id`/`type`, `slug`/`label`) are
+explicitly documented in `anakin-mcp/src/tools/wire.ts` and `client.ts`.
+
+### State-changing → task pane only, never a formula
+
+| Action | Endpoint(s) | Task pane control |
+| --- | --- | --- |
+| Run a Wire write action | `POST /wire/task` → poll `GET /wire/jobs/:jobId` | "Run write action" |
+| Sign in to a Wire site | `POST /wire/login` (sync) | "Sign in" |
+| Request a new Wire action | `POST /wire/build-request` (sync) | "Request build" |
+| Create a monitor | `POST /monitors` (sync) | "Create monitor" |
+| Control a monitor (pause/resume/run_now/delete) | `POST/DELETE /monitors/:id/...` | "Apply" |
+| Delete a saved session | `DELETE /sessions/:id` | "Delete session" |
+| Run an AI browser task | `POST /ai/evaluate` (async) → poll `GET /ai/jobs/:id` | "Run task into selected cell" |
+
+Every one of these is exposed *only* as a task-pane button (an explicit,
+one-shot user click, confirmed with `window.confirm()` before it runs) —
+never as a Custom Function. See "Read vs. write: why the split" below.
+
+Each surface's code lives at:
 
 | Surface | How | Where |
 | --- | --- | --- |
 | Task pane | Buttons that call `Excel.run(async (context) => ...)` and write results into the selected cell(s) | `src/taskpane/taskpane.js` |
-| Custom functions | `=ANAKIN.SCRAPE(url)`, `=ANAKIN.SEARCH(query)`, `=ANAKIN.AGENTICSEARCH(prompt)`, typed directly into any cell | `src/functions/functions.js` |
+| Custom functions | `=ANAKIN.SCRAPE(url)`, `=ANAKIN.MAP(url)`, … typed directly into any cell | `src/functions/functions.js` |
+| Shared HTTP client | Every `/v1/*` request/response shape used by both surfaces above | `src/utilities/api.js` |
 
-## Why both surfaces
+## What's not covered
+
+- **`wire_identities`** (`GET /wire/identities`) — lists saved credentials.
+  Secondary to `wire_login` (which returns a fresh `credential_id` directly)
+  and to the dashboard's own credential view; adding a formula or button
+  whose only output is an ID to paste into another field wasn't judged
+  worth the added surface for this pass. Straightforward to add later
+  following the `SESSIONLIST` pattern (same "unknown item shape → one JSON
+  row per credential" design) if needed.
+
+That's 3 (baseline: scrape/search/agentic search) + 10 new Custom Functions
++ 7 new task-pane actions = 20 of 21 covered.
+
+## Read vs. write: why the split
+
+Office.js Custom Functions have real execution constraints, confirmed live
+against Microsoft's docs (not assumed):
+
+- Custom functions that call an external API "return a JavaScript `Promise`"
+  and Excel "automatically waits for the promise to resolve before
+  displaying the result in the cell" — this is the documented, intended
+  pattern for exactly what `SCRAPE`/`MAP`/`CRAWL`/etc. do here (submit +
+  poll inside the returned promise). Streaming functions (`@streaming`,
+  repeated `setResult`) are a separate mechanism for continuously-updating
+  values (e.g. a live stock price) and weren't needed for anything Anakin
+  exposes — every new function here has a single terminal result, matching
+  the existing `SCRAPE`/`SEARCH`/`AGENTICSEARCH` shape.
+  (learn.microsoft.com/office/dev/add-ins/excel/custom-functions-web-reqs,
+  read live.)
+- Cancellation is real but coarse: Excel calls a function's `onCanceled`
+  when "the user edits or deletes a cell that references the function" or
+  "one of the arguments... changes" — and explicitly does **not** guarantee
+  ordering between the old call's cancellation and a new invocation
+  ("Your add-in code should not depend on `onCanceled` firing before the
+  next invocation"). Nothing in the Custom Functions runtime provides a
+  confirmation step, an "are you sure" gate, or any way to distinguish a
+  user-intended recalculation from Excel's own automatic one.
+- Anakin's own MCP tool definitions (`anakin-mcp/src/tools/*.ts`) mark
+  `wire_write_action`, `wire_login`, `wire_build`, `monitor_create`,
+  `monitor_control`, `session_delete`, and `browser_task` **all** with
+  `destructiveHint: true` — Anakin's own engineers already decided these
+  seven need a human in the loop before they run. A live formula is the
+  opposite of that: it can fire on workbook open, on a cell it references
+  changing, or on `Ctrl+Alt+F9`, with nobody watching. Each of the seven
+  runs from Wire's own endpoint or resource: signing in, submitting a form
+  or adding to a cart, requesting/publishing a new scraper, creating or
+  deleting a recurring billed job, deleting stored login state, or driving
+  a real browser that can change state on a third-party site — none of
+  those should re-fire silently.
+
+So the split is structural, not stylistic: **read-only and idempotent →
+Custom Function; anything `destructiveHint: true` → task-pane button behind
+an explicit click and a `window.confirm()`.** This mirrors exactly how
+Anakin's own MCP server (`anakin-mcp`) splits `wire_read_action` from
+`wire_write_action` into two separate tools with different safety
+annotations for the same underlying reason (see the comment atop
+`anakin-mcp/src/tools/wire.ts`).
+
+## Why both surfaces (for the original three)
 
 Excel add-ins support several extension points (task panes, custom functions,
 ribbon commands, dialogs, content add-ins — see

@@ -41,13 +41,41 @@ label {
 
 input[type="text"],
 input[type="password"],
-input[type="number"] {
+input[type="number"],
+textarea,
+select {
   width: 100%;
   box-sizing: border-box;
   padding: 6px 8px;
   margin-bottom: 8px;
   border: 1px solid #c7c7c7;
   border-radius: 4px;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 48px;
+}
+
+h3 {
+  font-size: 13px;
+  margin: 0 0 6px;
+}
+
+.subsection {
+  margin: 0 0 16px;
+}
+
+.subsection:last-child {
+  margin-bottom: 0;
+}
+
+.warning {
+  color: #b10e1c;
+  font-size: 12px;
+  margin: 0 0 8px;
 }
 
 .checkbox-row {

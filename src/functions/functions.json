@@ -84,6 +84,289 @@
       "options": {
         "cancelable": true
       }
+    },
+    {
+      "id": "MAP",
+      "name": "MAP",
+      "description": "Discover all reachable URLs under a site. Submits the map job and polls until it completes or fails.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "matrix"
+      },
+      "parameters": [
+        {
+          "name": "url",
+          "description": "The starting URL for discovery (typically a homepage or section root).",
+          "type": "string",
+          "dimensionality": "scalar"
+        },
+        {
+          "name": "limit",
+          "description": "Maximum number of URLs to return overall. Defaults to 100.",
+          "type": "number",
+          "dimensionality": "scalar",
+          "optional": true
+        },
+        {
+          "name": "depth",
+          "description": "How many link-hops from the starting URL to follow. Defaults to 2.",
+          "type": "number",
+          "dimensionality": "scalar",
+          "optional": true
+        },
+        {
+          "name": "useBrowser",
+          "description": "Render with a headless browser — best for single-page apps. Defaults to FALSE.",
+          "type": "boolean",
+          "dimensionality": "scalar",
+          "optional": true
+        }
+      ],
+      "options": {
+        "cancelable": true
+      }
+    },
+    {
+      "id": "CRAWL",
+      "name": "CRAWL",
+      "description": "Bulk-fetch markdown across a site. Submits the crawl job and polls until it completes or fails.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "matrix"
+      },
+      "parameters": [
+        {
+          "name": "url",
+          "description": "The starting URL.",
+          "type": "string",
+          "dimensionality": "scalar"
+        },
+        {
+          "name": "maxPages",
+          "description": "Hard cap on pages fetched. Defaults to 10.",
+          "type": "number",
+          "dimensionality": "scalar",
+          "optional": true
+        },
+        {
+          "name": "depth",
+          "description": "Link-hops from the starting URL to follow. Defaults to 1.",
+          "type": "number",
+          "dimensionality": "scalar",
+          "optional": true
+        },
+        {
+          "name": "useBrowser",
+          "description": "Render each page in a headless browser — best for single-page apps. Defaults to FALSE.",
+          "type": "boolean",
+          "dimensionality": "scalar",
+          "optional": true
+        }
+      ],
+      "options": {
+        "cancelable": true
+      }
+    },
+    {
+      "id": "WIREDISCOVER",
+      "name": "WIREDISCOVER",
+      "description": "Find Wire actions for a task from a natural-language intent. Wire is Anakin's catalog of pre-built automation actions across hundreds of websites. Synchronous — no polling.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "matrix"
+      },
+      "parameters": [
+        {
+          "name": "query",
+          "description": "The intent in natural language, e.g. \"top phones on walmart\".",
+          "type": "string",
+          "dimensionality": "scalar"
+        },
+        {
+          "name": "limit",
+          "description": "Maximum number of candidate actions to return. Defaults to 5.",
+          "type": "number",
+          "dimensionality": "scalar",
+          "optional": true
+        }
+      ],
+      "options": {
+        "cancelable": true
+      }
+    },
+    {
+      "id": "WIRECATALOG",
+      "name": "WIRECATALOG",
+      "description": "Browse the Wire catalog. With no slug, lists every supported website and its action count. Pass a slug for that site's full action list with parameter schemas. Synchronous — no polling. Returns raw JSON since the response shape differs by call.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "scalar"
+      },
+      "parameters": [
+        {
+          "name": "slug",
+          "description": "Catalog slug to inspect (e.g. \"walmart\"). Omit to list all catalogs.",
+          "type": "string",
+          "dimensionality": "scalar",
+          "optional": true
+        }
+      ],
+      "options": {
+        "cancelable": true
+      }
+    },
+    {
+      "id": "WIREREADACTION",
+      "name": "WIREREADACTION",
+      "description": "Run a Wire READ action (extracts data, no state change on the target site). Find action_ids and their param schemas with WIREDISCOVER / WIRECATALOG first. Transparently polls the job to completion. For WRITE actions, use the task pane's \"Run a Wire write action\" button instead.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "matrix"
+      },
+      "parameters": [
+        {
+          "name": "actionId",
+          "description": "The action to run (from WIREDISCOVER / WIRECATALOG).",
+          "type": "string",
+          "dimensionality": "scalar"
+        },
+        {
+          "name": "paramsJson",
+          "description": "The action's input parameters as a JSON object string, e.g. {\"query\":\"iphone 15\"}. Omit for actions that take none.",
+          "type": "string",
+          "dimensionality": "scalar",
+          "optional": true
+        },
+        {
+          "name": "credentialId",
+          "description": "Required when the action's auth_mode is \"required\"; honored when \"optional\". Get one from the Anakin dashboard.",
+          "type": "string",
+          "dimensionality": "scalar",
+          "optional": true
+        }
+      ],
+      "options": {
+        "cancelable": true
+      }
+    },
+    {
+      "id": "AIVISIBILITYSEARCH",
+      "name": "AIVISIBILITYSEARCH",
+      "description": "Ask multiple AI answer engines (ChatGPT, Gemini, Google AI Overview) the same question and compare their answers. Submits the search and polls until it's no longer \"running\". Billed per source at that source's rate.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "matrix"
+      },
+      "parameters": [
+        {
+          "name": "query",
+          "description": "The question to ask every engine (max 2000 characters).",
+          "type": "string",
+          "dimensionality": "scalar"
+        },
+        {
+          "name": "sources",
+          "description": "Comma-separated engine slugs to query (see AIVISIBILITYSOURCES). Omit to query all enabled engines.",
+          "type": "string",
+          "dimensionality": "scalar",
+          "optional": true
+        },
+        {
+          "name": "country",
+          "description": "Two-letter ISO country for the search geography. Defaults to \"us\".",
+          "type": "string",
+          "dimensionality": "scalar",
+          "optional": true
+        }
+      ],
+      "options": {
+        "cancelable": true
+      }
+    },
+    {
+      "id": "AIVISIBILITYSOURCES",
+      "name": "AIVISIBILITYSOURCES",
+      "description": "List the AI answer engines available to AIVISIBILITYSEARCH. Synchronous — no polling.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "matrix"
+      },
+      "parameters": [],
+      "options": {
+        "cancelable": true
+      }
+    },
+    {
+      "id": "SESSIONLIST",
+      "name": "SESSIONLIST",
+      "description": "List your saved browser sessions — encrypted login states used by SCRAPE/CRAWL (sessionId), monitors, and the task pane's browser-task button. Synchronous — no polling.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "matrix"
+      },
+      "parameters": [
+        {
+          "name": "domain",
+          "description": "Filter to sessions for one website domain, e.g. \"amazon.com\".",
+          "type": "string",
+          "dimensionality": "scalar",
+          "optional": true
+        }
+      ],
+      "options": {
+        "cancelable": true
+      }
+    },
+    {
+      "id": "MONITORLIST",
+      "name": "MONITORLIST",
+      "description": "List your website monitors, or pass an id to fetch one monitor's full configuration. Synchronous — no polling.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "matrix"
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "description": "Monitor ID — fetch just this monitor instead of the full list.",
+          "type": "string",
+          "dimensionality": "scalar",
+          "optional": true
+        }
+      ],
+      "options": {
+        "cancelable": true
+      }
+    },
+    {
+      "id": "MONITORCHANGES",
+      "name": "MONITORCHANGES",
+      "description": "Get the detected changes for a monitor. Find the monitor id with MONITORLIST first. Synchronous — no polling.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "matrix"
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "description": "The monitor ID (from MONITORLIST).",
+          "type": "string",
+          "dimensionality": "scalar"
+        }
+      ],
+      "options": {
+        "cancelable": true
+      }
     }
   ]
 }
