@@ -1,0 +1,102 @@
+/* Copyright Anakin (https://anakin.io). */
+
+body {
+  font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  color: #242424;
+  margin: 0;
+  padding: 0 16px 16px;
+}
+
+header {
+  padding: 16px 0 8px;
+}
+
+h1 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: #616161;
+}
+
+section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+h2 {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+
+label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  border: 1px solid #c7c7c7;
+  border-radius: 4px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: normal;
+  margin-bottom: 8px;
+}
+
+.checkbox-row input {
+  width: auto;
+  margin: 0;
+}
+
+button {
+  background: #0f6cbd;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+button:disabled {
+  background: #c7c7c7;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background: #115ea3;
+}
+
+.hint {
+  color: #616161;
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+
+.status {
+  min-height: 18px;
+  font-size: 12px;
+}
+
+.status.error {
+  color: #b10e1c;
+}
+
+.status.success {
+  color: #0e700e;
+}

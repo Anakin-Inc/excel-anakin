@@ -1,0 +1,89 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/office-js/custom-functions.schema.json",
+  "functions": [
+    {
+      "id": "SCRAPE",
+      "name": "SCRAPE",
+      "description": "Scrape a URL with Anakin and return clean markdown. Submits the scrape job and polls until it completes or fails.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "scalar"
+      },
+      "parameters": [
+        {
+          "name": "url",
+          "description": "The full URL of the page to scrape.",
+          "type": "string",
+          "dimensionality": "scalar"
+        },
+        {
+          "name": "useBrowser",
+          "description": "Use a headless browser — best for JS-heavy sites. Defaults to FALSE.",
+          "type": "boolean",
+          "dimensionality": "scalar",
+          "optional": true
+        }
+      ],
+      "options": {
+        "cancelable": true
+      }
+    },
+    {
+      "id": "SEARCH",
+      "name": "SEARCH",
+      "description": "AI-powered web search with citations. Synchronous on Anakin's side (no polling). Costs 3 credits per call.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "matrix"
+      },
+      "parameters": [
+        {
+          "name": "query",
+          "description": "The search query or question.",
+          "type": "string",
+          "dimensionality": "scalar"
+        },
+        {
+          "name": "limit",
+          "description": "Maximum number of results to return. Defaults to 5.",
+          "type": "number",
+          "dimensionality": "scalar",
+          "optional": true
+        }
+      ],
+      "options": {
+        "cancelable": true
+      }
+    },
+    {
+      "id": "AGENTICSEARCH",
+      "name": "AGENTICSEARCH",
+      "description": "Run Anakin's multi-stage AI research pipeline (search, scrape citations, extract structured data) and return the AI-generated summary. Submits the job and polls until it completes or fails. Costs 10 credits.",
+      "helpUrl": "https://anakin.io/dashboard",
+      "result": {
+        "type": "string",
+        "dimensionality": "scalar"
+      },
+      "parameters": [
+        {
+          "name": "prompt",
+          "description": "The research question or topic.",
+          "type": "string",
+          "dimensionality": "scalar"
+        },
+        {
+          "name": "useBrowser",
+          "description": "Use a headless browser when scraping citation pages. Defaults to TRUE.",
+          "type": "boolean",
+          "dimensionality": "scalar",
+          "optional": true
+        }
+      ],
+      "options": {
+        "cancelable": true
+      }
+    }
+  ]
+}

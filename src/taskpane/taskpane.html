@@ -1,0 +1,75 @@
+<!-- Copyright Anakin (https://anakin.io). -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Anakin</title>
+
+  <!-- Office JavaScript API -->
+  <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+
+  <!-- Shared runtime scripts, loaded in dependency order. Under the
+       SharedRuntime declared in manifest.xml, this page IS the custom
+       functions runtime too (the CustomFunctions ExtensionPoint's Script and
+       Page both point back at this file) — so functions.js runs in this same
+       window, and the AnakinState/Anakin globals defined below are what
+       ANAKIN.SCRAPE / ANAKIN.SEARCH / ANAKIN.AGENTICSEARCH read from when
+       called from a cell. -->
+  <script type="text/javascript" src="../utilities/state.js"></script>
+  <script type="text/javascript" src="../utilities/api.js"></script>
+  <script type="text/javascript" src="../functions/functions.js"></script>
+  <script type="text/javascript" src="taskpane.js"></script>
+
+  <link href="taskpane.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <header>
+    <h1>Anakin</h1>
+    <p class="subtitle">Web scraping and AI search for Excel.</p>
+  </header>
+
+  <main>
+    <section id="auth-section">
+      <label for="api-key-input">Anakin API key</label>
+      <input type="password" id="api-key-input" placeholder="ak-..." autocomplete="off" />
+      <button id="save-key-button">Save key</button>
+      <p class="hint">
+        Get a free key (300 credits, no card required) at
+        <a href="https://anakin.io/dashboard" target="_blank" rel="noopener">anakin.io/dashboard</a>.
+        Stored in this workbook's settings, not sent anywhere but api.anakin.io.
+      </p>
+      <p id="key-status" class="status"></p>
+    </section>
+
+    <section id="scrape-section">
+      <h2>Scrape a URL</h2>
+      <input type="text" id="scrape-url-input" placeholder="https://example.com" />
+      <label class="checkbox-row">
+        <input type="checkbox" id="scrape-browser-checkbox" />
+        Use headless browser (JS-heavy sites)
+      </label>
+      <button id="scrape-button">Scrape into selected cell</button>
+    </section>
+
+    <section id="search-section">
+      <h2>AI search</h2>
+      <input type="text" id="search-query-input" placeholder="Search query or question" />
+      <input type="number" id="search-limit-input" placeholder="Result limit (default 5)" min="1" max="20" />
+      <button id="search-button">Search into selected cell</button>
+    </section>
+
+    <section id="agentic-section">
+      <h2>Agentic research</h2>
+      <input type="text" id="agentic-prompt-input" placeholder="Research question or topic" />
+      <button id="agentic-button">Run into selected cell</button>
+    </section>
+
+    <p id="result-status" class="status" role="status" aria-live="polite"></p>
+  </main>
+</body>
+
+</html>
