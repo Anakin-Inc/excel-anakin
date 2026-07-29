@@ -23,6 +23,40 @@ package.json, package-lock.json   Real office-addin-* devDependencies, from a re
 .gitignore                  node_modules/, dist/, *.log
 ```
 
+## Full API coverage (feat/full-tool-coverage)
+
+The initial submission covered 3 of Anakin's 21 REST API capabilities
+(scrape, search, agentic_search). This branch adds 10 more Custom Functions
+(MAP, CRAWL, WIREDISCOVER, WIRECATALOG, WIREREADACTION, AIVISIBILITYSEARCH,
+AIVISIBILITYSOURCES, SESSIONLIST, MONITORLIST, MONITORCHANGES) and 7 new
+task-pane-only actions (wire_write_action, wire_login, wire_build,
+monitor_create, monitor_control, session_delete, browser_task) — 20 of 21
+covered; `wire_identities` deliberately left out. See README.md's "What's
+covered" / "What's not covered" / "Read vs. write: why the split" sections
+for the full breakdown and the reasoning, and the comment atop
+`src/functions/functions.js` for why the 7 write actions are task-pane-only.
+
+Ground truth for every new endpoint (request bodies, response shapes, job
+polling behavior, credit-cost notes) was read directly from Anakin's own MCP
+server source — `anakin-mcp/src/client.ts` and `anakin-mcp/src/tools/*.ts`
+— not guessed. Where the source itself types a response as `unknown` (Wire
+catalog browsing, a Wire action's extracted `data`, session/monitor list
+items), the corresponding function surfaces the real JSON rather than
+inventing field names — see the README's "What's covered" table notes.
+
+The read-vs-write execution-constraint claims (Custom Functions "return a
+Promise" and Excel awaits it; `onCanceled` ordering is not guaranteed;
+streaming functions are a separate mechanism for continuously-updating
+values) were confirmed live against
+`learn.microsoft.com/office/dev/add-ins/excel/custom-functions-web-reqs` and
+`.../custom-functions-parameter-options`, not assumed. Microsoft's docs
+don't state a "don't put side effects in a custom function" rule in so many
+words; the design instead follows Anakin's own MCP tool annotations
+(`destructiveHint: true` on all 7 of the write-side tools, in
+`anakin-mcp/src/tools/*.ts`), which is the actual, load-bearing signal that
+those 7 operations need a human-confirmed, one-shot trigger rather than a
+formula Excel can silently re-fire.
+
 Hand-authored, not `yo office`-scaffolded — there's no webpack build step, and
 `functions.json` was written by hand against the real "Manually create JSON
 metadata for custom functions" reference doc's schema (its own text
@@ -112,17 +146,36 @@ API key that both the task pane buttons and the `ANAKIN.*` formulas read.
   ribbon surface should check that reference page by hand.
 - **`node --check` passes on all four hand-written `.js` files**
   (`src/taskpane/taskpane.js`, `src/utilities/api.js`,
-  `src/utilities/state.js`, `src/functions/functions.js`).
+  `src/utilities/state.js`, `src/functions/functions.js`) — re-run after
+  `feat/full-tool-coverage`'s additions to `taskpane.js`, `api.js`, and
+  `functions.js`; still passes clean.
 - **`manifest.xml` parses as well-formed XML** (`python3 -m xml.dom.minidom`)
   and **`functions.json`/`package.json` parse as valid JSON**
-  (`python3 -m json`).
+  (`python3 -m json`) — re-checked after `feat/full-tool-coverage` added 10
+  new function entries to `functions.json` and rewrote `manifest.xml`'s
+  `Description`/`GetStarted.Description`/`BtnShowTaskpane.Tooltip` strings
+  to mention the new capabilities (the first draft of the new `Description`
+  exceeded the schema's `LongString` max length — caught by
+  `office-addin-manifest validate`, then shortened to fit; see git history).
+- **Every `getElementById` call in the new `taskpane.js` handlers resolves
+  to a real element in the new `taskpane.html` sections** — cross-checked
+  by diffing the two ID sets, not just eyeballed.
 - **`npx office-addin-lint check` ran for real** and flagged 65 real
-  findings — almost all either (a) browser globals (`window`, `document`,
-  `fetch`, `setTimeout`) reported as `no-undef` because this hand-authored
-  project has no ESLint config declaring a browser environment (a
-  `yo office`-scaffolded project ships one by default; this one doesn't), or
-  (b) Prettier formatting deltas. None were logic bugs. Not fixed — left as
-  a known gap rather than papering over it; see "Not done."
+  findings on the original 3-function submission — almost all either (a)
+  browser globals (`window`, `document`, `fetch`, `setTimeout`) reported as
+  `no-undef` because this hand-authored project has no ESLint config
+  declaring a browser environment (a `yo office`-scaffolded project ships
+  one by default; this one doesn't), or (b) Prettier formatting deltas.
+  None were logic bugs. Not fixed — left as a known gap rather than
+  papering over it; see "Not done." **Re-run after `feat/full-tool-coverage`
+  added ~4x the code**: 246 findings now (174 Prettier, 68 `no-undef` on the
+  same browser globals — `document`×42, `AbortController`×13, `window`×10,
+  `setTimeout`/`fetch`/`clearTimeout`×1 each — plus 4 `no-unused-vars` false
+  positives on `Anakin`/`AnakinState`, which the plain-`<script>`-tag shared
+  runtime assigns but never `export`s, so a modules-aware linter can't see
+  the cross-file usage). Same three categories as before, scaled with the
+  code; manually reviewed and confirmed none are logic bugs. Still not
+  fixed, for the same reason as before.
 - **Live CORS preflight against `https://api.anakin.io/v1/search`** (a real
   `curl -X OPTIONS` with `Origin: https://localhost:3000`) returned
   `HTTP/2 204` with `access-control-allow-origin: *` and
@@ -161,7 +214,12 @@ API key that both the task pane buttons and the `ANAKIN.*` formulas read.
   real `200` response from `/url-scraper`, `/search`, or `/agentic-search`
   actually deserializes the way `api.js` assumes (e.g. that `job.markdown`
   and `job.generatedJson.structured_data` are really at those paths on a
-  genuine completed job, not just in the Pydantic model definitions).
+  genuine completed job, not just in the Pydantic model definitions). Same
+  caveat applies to every endpoint `feat/full-tool-coverage` added — `map`,
+  `crawl`, `wire/*`, `ai-visibility/*`, `sessions`, `monitors`, and
+  `ai/evaluate` request/response shapes were read from `anakin-mcp`'s own
+  TypeScript client/tool source (not guessed), but never exercised against
+  live API responses.
 - **Nothing is hosted.** Every URL in `manifest.xml`
   (`https://excel-addin.anakin.io/...`) is a placeholder matching the
   `anakin.io`-subdomain pattern other integrations in this batch use. Excel

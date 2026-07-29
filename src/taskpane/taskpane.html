@@ -68,6 +68,112 @@
       <button id="agentic-button">Run into selected cell</button>
     </section>
 
+    <!-- Everything below is state-changing (on Anakin's own account state or
+         on a third-party site) and is deliberately task-pane-only, never a
+         live cell formula that Excel could silently re-trigger on
+         recalculation — see README.md's "Read vs. write" section and the
+         comment atop src/functions/functions.js. Each button confirms
+         before running. -->
+    <section id="wire-write-section">
+      <h2>Wire — automation catalog</h2>
+
+      <div class="subsection">
+        <h3>Run a Wire write action</h3>
+        <p class="warning">Changes state on the target site (submits a form, adds to a cart, etc.) — not a Custom Function on purpose.</p>
+        <input type="text" id="wire-write-action-id-input" placeholder="action_id, e.g. amazon.add_to_cart" />
+        <textarea id="wire-write-params-input" placeholder='Params as JSON, e.g. {"productId":"B0..."}'></textarea>
+        <input type="text" id="wire-write-credential-id-input" placeholder="credential_id (optional — required if the action needs auth)" />
+        <button id="wire-write-button">Run write action</button>
+      </div>
+
+      <div class="subsection">
+        <h3>Sign in to a Wire site</h3>
+        <p class="warning">Establishes and stores an encrypted session.</p>
+        <input type="text" id="wire-login-catalog-slug-input" placeholder="catalog_slug, e.g. neb" />
+        <textarea id="wire-login-params-input" placeholder='Login fields as JSON, e.g. {"email":"...","password":"..."}'></textarea>
+        <input type="text" id="wire-login-identity-name-input" placeholder="Identity name (optional)" />
+        <button id="wire-login-button">Sign in</button>
+      </div>
+
+      <div class="subsection">
+        <h3>Request a new Wire action</h3>
+        <p class="warning">Spends credits building and publishing a new catalog action.</p>
+        <input type="text" id="wire-build-url-input" placeholder="website_url" />
+        <textarea id="wire-build-goal-input" placeholder="Goal — what should the action do or extract?"></textarea>
+        <select id="wire-build-visibility-select">
+          <option value="private" selected>Private</option>
+          <option value="public">Public</option>
+        </select>
+        <label class="checkbox-row">
+          <input type="checkbox" id="wire-build-force-checkbox" />
+          Build even if similar actions already exist
+        </label>
+        <button id="wire-build-button">Request build</button>
+      </div>
+    </section>
+
+    <section id="monitor-section">
+      <h2>Website monitoring</h2>
+
+      <div class="subsection">
+        <h3>Create a monitor</h3>
+        <p class="warning">Creates a recurring, credit-billed job that can send alerts.</p>
+        <input type="text" id="monitor-create-url-input" placeholder="URL to watch" />
+        <input type="number" id="monitor-create-interval-input" placeholder="Check frequency in minutes (min 15)" min="15" />
+        <select id="monitor-create-scope-select">
+          <option value="page" selected>Page — watch one URL</option>
+          <option value="site">Site — crawl and track pages</option>
+          <option value="wire">Wire — run a Wire action each check</option>
+        </select>
+        <select id="monitor-create-watchmode-select">
+          <option value="full_page" selected>Full page (2 credits/check)</option>
+          <option value="specific_data">Specific data via AI (3 credits/check, needs outputSchema)</option>
+        </select>
+        <label class="checkbox-row">
+          <input type="checkbox" id="monitor-create-aimode-checkbox" />
+          AI meaningful-change filtering (+1 credit/check)
+        </label>
+        <textarea id="monitor-create-advanced-input" placeholder='Advanced options as JSON (optional) — merged in, e.g. {"outputSchema":{...},"alertWebhookUrl":"..."}'></textarea>
+        <button id="monitor-create-button">Create monitor</button>
+      </div>
+
+      <div class="subsection">
+        <h3>Control a monitor</h3>
+        <p class="warning">"delete" is permanent and removes the monitor's history.</p>
+        <input type="text" id="monitor-control-id-input" placeholder="Monitor ID (see =ANAKIN.MONITORLIST())" />
+        <select id="monitor-control-action-select">
+          <option value="pause">Pause</option>
+          <option value="resume">Resume</option>
+          <option value="run_now">Run now</option>
+          <option value="delete">Delete</option>
+        </select>
+        <button id="monitor-control-button">Apply</button>
+      </div>
+    </section>
+
+    <section id="session-section">
+      <h2>Browser sessions</h2>
+      <div class="subsection">
+        <h3>Delete a saved session</h3>
+        <p class="warning">Irreversible — anything referencing this sessionId loses authenticated access.</p>
+        <input type="text" id="session-delete-id-input" placeholder="Session ID (see =ANAKIN.SESSIONLIST())" />
+        <button id="session-delete-button">Delete session</button>
+      </div>
+    </section>
+
+    <section id="browser-task-section">
+      <h2>AI browser automation</h2>
+      <div class="subsection">
+        <h3>Run a browser task</h3>
+        <p class="warning">Drives a real browser that can change state on the target site. Can take up to ~5 minutes.</p>
+        <textarea id="browser-task-prompt-input" placeholder='Task in natural language, e.g. "find the cheapest 65-inch TV and list its specs"'></textarea>
+        <input type="text" id="browser-task-url-input" placeholder="Starting URL (optional)" />
+        <input type="text" id="browser-task-session-id-input" placeholder="session_id for login-protected tasks (optional)" />
+        <input type="number" id="browser-task-max-steps-input" placeholder="Max steps (optional)" min="1" />
+        <button id="browser-task-button">Run task into selected cell</button>
+      </div>
+    </section>
+
     <p id="result-status" class="status" role="status" aria-live="polite"></p>
   </main>
 </body>

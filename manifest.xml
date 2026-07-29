@@ -31,7 +31,7 @@
   <ProviderName>Anakin</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Anakin" />
-  <Description DefaultValue="Scrape URLs, run AI-powered web search, and run multi-stage agentic research from an Excel task pane or directly in cell formulas (=ANAKIN.SEARCH, =ANAKIN.SCRAPE)." />
+  <Description DefaultValue="Scrape, map, and crawl sites, run AI search/research, discover and run Wire automation, compare AI-visibility answers, and inspect monitors/sessions — via cell formulas (=ANAKIN.SCRAPE, =ANAKIN.MAP, and more) or the task pane." />
   <IconUrl DefaultValue="https://excel-addin.anakin.io/assets/icon-32.png" />
   <HighResolutionIconUrl DefaultValue="https://excel-addin.anakin.io/assets/icon-80.png" />
   <SupportUrl DefaultValue="https://anakin.io/dashboard" />
@@ -166,8 +166,8 @@
         <bt:String id="BtnShowTaskpane.Label" DefaultValue="Anakin" />
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="GetStarted.Description" DefaultValue="Enter your Anakin API key, then scrape a page, run an AI search, or use ANAKIN.SEARCH / ANAKIN.SCRAPE / ANAKIN.AGENTICSEARCH directly in a cell." />
-        <bt:String id="BtnShowTaskpane.Tooltip" DefaultValue="Open the Anakin task pane to scrape URLs, search the web, or run agentic research." />
+        <bt:String id="GetStarted.Description" DefaultValue="Enter your Anakin API key, then scrape/map/crawl sites, search, or run Wire automation and AI-visibility checks — via ANAKIN.* formulas in a cell, or the task pane for sign-in, monitors, and other actions that change state." />
+        <bt:String id="BtnShowTaskpane.Tooltip" DefaultValue="Open the Anakin task pane to scrape/map/crawl sites, search the web, run agentic research, and manage Wire sign-ins, monitors, and browser sessions." />
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>
