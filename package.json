@@ -10,8 +10,8 @@
     "lint": "office-addin-lint check"
   },
   "devDependencies": {
-    "office-addin-debugging": "^6.1.2",
-    "office-addin-manifest": "^2.1.6",
+    "office-addin-debugging": "^7.0.1",
+    "office-addin-manifest": "^3.0.1",
     "office-addin-lint": "^3.0.10"
   },
   "engines": {
